@@ -1,0 +1,22 @@
+# Source files (only dist should be published)
+src/
+*.ts
+!dist/
+
+# Test files
+test-*
+test-full.ts
+
+# IDE/Build files
+node_modules/
+tsconfig.json
+.npmignore
+.git/
+.github/
+.vscode/
+*.md
+.DS_Store
+.env*
+
+# Build config
+tsup.config.*
