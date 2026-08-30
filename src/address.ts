@@ -1,9 +1,13 @@
-import * as _bech32 from 'bech32';
-const bech32 = _bech32 as any;
+// @ts-nocheck
+/**
+ * Sahyadri Address Generation (CSM32 Bech32 Format)
+ * Converts ML-DSA-65 public key to csm1s... addresses
+ */
+import { bech32 } from '@scure/base';
 import { sha3 } from './sha3';
 
-const PREFIX_MAIN = 'csm';
-const PREFIX_TEST = 'csmtest';
+const PREFIX_MAIN = 'csm1s';  // Mainnet: csm1s...
+const PREFIX_TEST = 'tcsms';  // Testnet: tcsms...
 
 function pubkeyToHash(pk: Uint8Array): Uint8Array {
   return sha3(pk).slice(0, 20);

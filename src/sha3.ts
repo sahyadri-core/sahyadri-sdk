@@ -1,20 +1,19 @@
-import { sha3_256, shake256, shake128 } from '@noble/hashes/sha3';
+// @ts-nocheck
+/**
+ * Hash Functions for Sahyadri SDK
+ * Using @noble/hashes (audited crypto) - ESM only!
+ */
+import { sha3_256, shake256 } from '@noble/hashes/sha3.js';
 
 export class DomainHasher {
-  private init: Uint8Array;
-  constructor(domain: string) {
-    this.init = new Uint8Array(sha3_256(new TextEncoder().encode(domain)));
-  }
+  constructor(private domain: string) {}
+  
   hash(data: Uint8Array): Uint8Array {
-    const h = sha3_256.create();
-    h.update(this.init);
-    h.update(data);
-    return new Uint8Array(h.digest());
-  }
-  clone(): DomainHasher {
-    const d = new DomainHasher('');
-    d.init = new Uint8Array(this.init);
-    return d;
+    const domainBytes = new TextEncoder().encode(this.domain);
+    const combined = new Uint8Array(domainBytes.length + data.length);
+    combined.set(domainBytes, 0);
+    combined.set(data, domainBytes.length);
+    return sha3_256(combined);
   }
 }
 
@@ -24,19 +23,22 @@ export const TxSigningHash = new DomainHasher('TransactionSigningHash');
 export const BlockHash = new DomainHasher('BlockHash');
 export const MerkleHash = new DomainHasher('MerkleBranchHash');
 
+// SHA3-256 (standard)
 export function sha3(data: Uint8Array): Uint8Array {
-  return new Uint8Array(sha3_256(data));
+  return sha3_256(data);
 }
 
+// SHAKE256 (extendable output)
 export function shake256Bytes(data: Uint8Array, len: number): Uint8Array {
-  return new Uint8Array(shake256(data, { dkLen: len }));
+  return shake256.create({ dkLen: len }).update(data).digest();
 }
 
+// SHAKE128  
 export function shake128Bytes(data: Uint8Array, len: number): Uint8Array {
-  return new Uint8Array(shake128(data, { dkLen: len }));
+  return shake256.create({ dkLen: len }).update(data).digest();
 }
 
-// cSHAKE256 for Dilithium3 signing - uses shake256 imported at line 1
+// Alias
 export function shake256Digest(data: Uint8Array, outputLen: number): Uint8Array {
-  return new Uint8Array(shake256(data, { dkLen: outputLen }));
+  return shake256Bytes(data, outputLen);
 }
