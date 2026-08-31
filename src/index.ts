@@ -46,3 +46,11 @@ export { Wallet } from './wallet/index';
 
 // Hash Functions
 export { shake256Bytes, shake256Digest, sha3 } from './sha3';
+
+// Mnemonic / Seed Phrase
+export {
+  generateMnemonic,
+  validateMnemonic,
+  mnemonicToSeed,
+  mnemonicToSeedSync,
+} from './mnemonic/index.js';
