@@ -7,7 +7,7 @@ import { ml_dsa65 } from '@noble/post-quantum/ml-dsa.js';
 import { mnemonicToSeedSync } from 'bip39';
 
 /* ═══════════════════════════════════════════
-   RANDOM KEYPAIR (for testing only)
+   KEYPAIR GENERATION
    ═══════════════════════════════════════════ */
 export function keypair(): { publicKey: Uint8Array; secretKey: Uint8Array } {
   const keys = ml_dsa65.keygen();
@@ -17,23 +17,13 @@ export function keypair(): { publicKey: Uint8Array; secretKey: Uint8Array } {
   };
 }
 
-/* ═══════════════════════════════════════════
-   DETERMINISTIC KEYPAIR FROM MNEMONIC
-   Same mnemonic = Same keys = Same address (ALWAYS)
-   ═══════════════════════════════════════════ */
 export function keypairFromMnemonic(mnemonic: string): {
   publicKey: Uint8Array;
   secretKey: Uint8Array;
 } {
-  // Step 1: BIP-39 mnemonic → 64-byte seed
   const seed64 = mnemonicToSeedSync(mnemonic.trim().toLowerCase());
-  
-  // Step 2: First 32 bytes Dilithium ke liye
   const seed32 = new Uint8Array(seed64.slice(0, 32));
-  
-  // Step 3: Deterministic keygen (FIPS 204)
   const keys = ml_dsa65.keygen(seed32);
-  
   return {
     publicKey: keys.publicKey,
     secretKey: keys.secretKey,
@@ -41,17 +31,18 @@ export function keypairFromMnemonic(mnemonic: string): {
 }
 
 /* ═══════════════════════════════════════════
-   SIGN
+   SIGN - @noble API: sign(message, secretKey)
    ═══════════════════════════════════════════ */
 export function sign(
   secretKey: Uint8Array,
   message: Uint8Array
 ): Uint8Array {
-  return ml_dsa65.sign(secretKey, message);
+  // @noble API: sign(message, secretKey)
+  return ml_dsa65.sign(message, secretKey);
 }
 
 /* ═══════════════════════════════════════════
-   VERIFY
+   VERIFY - @noble API: verify(signature, message, publicKey)
    ═══════════════════════════════════════════ */
 export function verify(
   publicKey: Uint8Array,
@@ -59,7 +50,8 @@ export function verify(
   message: Uint8Array
 ): boolean {
   try {
-    return ml_dsa65.verify(publicKey, message, signature);
+    // @noble API: verify(signature, message, publicKey)
+    return ml_dsa65.verify(signature, message, publicKey);
   } catch (e) {
     return false;
   }
