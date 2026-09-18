@@ -14,3 +14,4 @@ export { keypair, keypairFromMnemonic, sign, verify } from './dilithium/index';
 
 // Mnemonic exports
 export * from './mnemonic';
+export { decodeAddressPayload } from './address';

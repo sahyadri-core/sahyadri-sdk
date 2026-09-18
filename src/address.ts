@@ -85,3 +85,47 @@ export function pubkeyToAddress(pk: Uint8Array): string {
 export function isValidAddress(addr: string): boolean {
   return addr.startsWith('csm1');
 }
+
+/* ═══════════════════════════════════════════
+   DECODE ADDRESS → RAW BYTES (hex)
+   For transaction receiver field
+   ═══════════════════════════════════════════ */
+
+const REV_CHARSET_DECODE: number[] = new Array(123).fill(100);
+const CHARSET_DECODE = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+for (let i = 0; i < CHARSET_DECODE.length; i++) {
+  REV_CHARSET_DECODE[CHARSET_DECODE.charCodeAt(i)] = i;
+}
+
+function conv5to8(payload: number[]): number[] {
+  const eightBit: number[] = [];
+  let buff = 0, bits = 0;
+  for (const c of payload) {
+    buff = (buff << 5) | c;
+    bits += 5;
+    while (bits >= 8) {
+      bits -= 8;
+      eightBit.push((buff >> bits) & 0xff);
+      buff &= (1 << bits) - 1;
+    }
+  }
+  return eightBit;
+}
+
+export function decodeAddressPayload(address: string): string {
+  const match = address.match(/^([a-z]+)1(.+)$/);
+  if (!match) throw new Error('Invalid address format');
+  const [, , payloadStr] = match;
+
+  const addressU5: number[] = [];
+  for (const ch of payloadStr) {
+    const val = REV_CHARSET_DECODE[ch.charCodeAt(0)];
+    if (val === 100) throw new Error(`Invalid character: ${ch}`);
+    addressU5.push(val);
+  }
+
+  const payloadU5 = addressU5.slice(0, addressU5.length - 8);
+  const payloadU8 = conv5to8(payloadU5);
+
+  return payloadU8.map(b => b.toString(16).padStart(2, '0')).join('');
+}
