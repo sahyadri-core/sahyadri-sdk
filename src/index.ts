@@ -1,56 +1,16 @@
 // @ts-nocheck
-/**
- * @sahyadrinet/web3.js - Sahyadri L1 Blockchain SDK
- * Post-Quantum Secure Web3 Library
- */
+export * from './types';
+export * from './sha3';
+export * from './address';
+export * from './did';
+export * from './node-client';
+export * from './rpc/client';
+export * from './storage';
+export * from './tx/transaction';
+export * from './wallet';
 
-// Core Crypto (ML-DSA-65 / Dilithium3)
-export { keypair, sign, verify } from './dilithium/index';
+// Dilithium exports
+export { keypair, keypairFromMnemonic, sign, verify } from './dilithium/index';
 
-// Address Generation (CSM32 Bech32)
-export { pubkeyToAddress } from './address';
-
-// Decentralized Identifiers (DID + CREST Model)
-export {
-  // Types
-  CrestDocument,
-  CrestService,
-  CrestAuthentication,
-  CrestProof,
-  DidResolutionResult,
-  CrestError,
-  CrestPurpose,
-  
-  // DID Utilities
-  isValidDidFormat,
-  parseDid,
-  generateDidIdentifier,
-  DID_PREFIX,
-  DID_METHOD,
-  
-  // CREST Builder
-  CrestBuilder,
-  
-  // DID Operations
-  signDidOperation,
-  verifyDidOperation,
-  resolveDidLocally,
-  
-  // Service Helpers
-  createDidCommService,
-  createLinkedDomainsService
-} from './did/index';
-
-// Wallet
-export { Wallet } from './wallet/index';
-
-// Hash Functions
-export { shake256Bytes, shake256Digest, sha3 } from './sha3';
-
-// Mnemonic / Seed Phrase
-export {
-  generateMnemonic,
-  validateMnemonic,
-  mnemonicToSeed,
-  mnemonicToSeedSync,
-} from './mnemonic/index.js';
+// Mnemonic exports
+export * from './mnemonic';
