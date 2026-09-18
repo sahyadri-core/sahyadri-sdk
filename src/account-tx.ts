@@ -61,7 +61,7 @@ export function computeAccountTxSighash(
   const parts: Uint8Array[] = [];
 
   parts.push(new TextEncoder().encode('SAHYADRI_ACCOUNT_TX_V1'));
-  parts.push(u64LE(ACCOUNT_TX_VERSION));
+  parts.push(u16LE(ACCOUNT_TX_VERSION));
   parts.push(u64LE(amountKana));
   parts.push(u16LE(SCRIPT_CLASS_PUBKEY_DILITHIUM));
   parts.push(u64LE(receiverScript.length));
