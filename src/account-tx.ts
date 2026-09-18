@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { sha256 } from '@noble/hashes/sha256';
+import { sha256 } from '@noble/hashes/sha256.js';
 
 const SCRIPT_CLASS_PUBKEY_DILITHIUM = 4;  // ScriptClass enum
 const ACCOUNT_TX_VERSION = 0;
