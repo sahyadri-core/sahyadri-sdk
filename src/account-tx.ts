@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { sha256 } from '@noble/hashes/sha2.js';
 
-const SCRIPT_CLASS_PUBKEY_DILITHIUM = 4;  // ScriptClass enum
+const SCRIPT_CLASS_PUBKEY_DILITHIUM = 0;  // ScriptClass enum
 const ACCOUNT_TX_VERSION = 0;
 const LOCK_TIME = 0;
 const SUBNETWORK_ID_ZERO = new Uint8Array(20);
