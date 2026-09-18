@@ -1,15 +1,11 @@
 // @ts-nocheck
 import { sha256 } from '@noble/hashes/sha2.js';
 
-const SCRIPT_CLASS_PUBKEY_DILITHIUM = 0;  // ScriptClass enum
+const SCRIPT_CLASS_PUBKEY_DILITHIUM = 0;  // Node uses MAX_SCRIPT_PUBLIC_KEY_VERSION = 0
 const ACCOUNT_TX_VERSION = 0;
 const LOCK_TIME = 0;
 const SUBNETWORK_ID_ZERO = new Uint8Array(20);
 const DEFAULT_GAS = 1000;
-
-/* ═══════════════════════════════════════════
-   Byte Helpers
-   ═══════════════════════════════════════════ */
 
 function u64LE(n: number): Uint8Array {
   const buf = new Uint8Array(8);
@@ -44,86 +40,55 @@ function hexToBytes(hex: string): Uint8Array {
   return out;
 }
 
-/* ═══════════════════════════════════════════
-   Build Script from Address Payload (20-byte hash)
-   Format: [0x14, ...20 bytes, 0xac] = 22 bytes
-   ═══════════════════════════════════════════ */
-
 export function buildDilithiumScript(addressPayload: Uint8Array): Uint8Array {
   if (addressPayload.length !== 20) {
     throw new Error('Address payload must be 20 bytes');
   }
   const script = new Uint8Array(22);
-  script[0] = 0x14;  // OP_PUSHBYTES_20
+  script[0] = 0x14;
   script.set(addressPayload, 1);
-  script[21] = 0xac; // OP_CHECKSIG
+  script[21] = 0xac;
   return script;
 }
 
-/* ═══════════════════════════════════════════
-   Compute Account Tx Sighash (EXACT match with Rust)
-   
-   sighash = SHA256(
-     "SAHYADRI_ACCOUNT_TX_V1" ||
-     version(u64 LE) ||
-     [for each output:
-        value(u64 LE) ||
-        spk.version(u16 LE) ||
-        spk.script.length(u64 LE) ||
-        spk.script
-     ] ||
-     lock_time(u64 LE) ||
-     subnetwork_id(20 bytes) ||
-     gas(u64 LE) ||
-     signable_payload.length(u64 LE) ||
-     signable_payload
-   )
-   ═══════════════════════════════════════════ */
-
 export function computeAccountTxSighash(
   senderPubkeyHex: string,
-  receiverScript: Uint8Array,   // 22-byte script
-  amountKana: number,            // u64
-  nonce: number,                 // u64
+  receiverScript: Uint8Array,
+  amountKana: number,
+  nonce: number,
   gas: number = DEFAULT_GAS
 ): Uint8Array {
   const parts: Uint8Array[] = [];
 
-  // 1. Literal domain tag
   parts.push(new TextEncoder().encode('SAHYADRI_ACCOUNT_TX_V1'));
-
-  // 2. tx.version (u64 LE)
   parts.push(u64LE(ACCOUNT_TX_VERSION));
-
-  // 3. Outputs array (only 1 output)
-  //    - output.value (u64 LE)
   parts.push(u64LE(amountKana));
-  //    - output.script_public_key.version (u16 LE)
   parts.push(u16LE(SCRIPT_CLASS_PUBKEY_DILITHIUM));
-  //    - output.script_public_key.script.length (u64 LE)
   parts.push(u64LE(receiverScript.length));
-  //    - output.script_public_key.script (bytes)
   parts.push(receiverScript);
-
-  // 4. tx.lock_time (u64 LE)
   parts.push(u64LE(LOCK_TIME));
-
-  // 5. tx.subnetwork_id (20 zero bytes)
   parts.push(SUBNETWORK_ID_ZERO);
-
-  // 6. tx.gas (u64 LE)
   parts.push(u64LE(gas));
 
-  // 7. signable_payload = sender_pubkey || nonce_LE
   const senderPubkey = hexToBytes(senderPubkeyHex);
   const signablePayload = concat(senderPubkey, u64LE(nonce));
-
-  // 8. signable_payload.length (u64 LE)
   parts.push(u64LE(signablePayload.length));
-
-  // 9. signable_payload bytes
   parts.push(signablePayload);
 
-  // 10. SHA256 of all
   return sha256(concat(...parts));
+}
+
+/* ═══════════════════════════════════════════
+   NODE-KOMPATIBLE ML-DSA SIGN
+   Node prefixes message with [0x00, ctx_len] || ctx
+   (ctx = empty, so prefix = [0x00, 0x00])
+   ═══════════════════════════════════════════ */
+
+export function prefixMessageForNode(message: Uint8Array): Uint8Array {
+  // FIPS 204: M' = IntegerToBytes(0, 1) || IntegerToBytes(|ctx|, 1) || ctx || M
+  const prefix = new Uint8Array([0x00, 0x00]); // domain=0, ctx_len=0
+  const result = new Uint8Array(prefix.length + message.length);
+  result.set(prefix, 0);
+  result.set(message, prefix.length);
+  return result;
 }
