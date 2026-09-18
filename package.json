@@ -1,6 +1,6 @@
 {
   "name": "@sahyadrinet/web3.js",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Sahyadri L1 Blockchain SDK - Post-Quantum Secure Web3 Library",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
