@@ -82,4 +82,13 @@ export class SahyadriClient {
       this.ws = null;
     }
   }
+
+  /**
+   * Returns current virtual DAA score.
+   * Used to compute FlashTx expiry.
+   */
+  async getDaaScore(): Promise<bigint> {
+    const result = await this.call('getDaaScore', {});
+    return BigInt(result?.daa_score ?? 0);
+  }
 }
