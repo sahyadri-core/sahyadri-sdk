@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts --format cjs,esm --dts && cp dist/index.d.mts dist/index.d.ts",
     "test": "npx tsx test-full.ts"
   },
   "keywords": [
