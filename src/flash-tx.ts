@@ -10,7 +10,7 @@
  * Any field order / byte-order change here MUST be mirrored in Rust.
  */
 
-import { sha256 } from '@noble/hashes/sha2.js';
+import { sha3_256 } from '@noble/hashes/sha3.js';
 import { sign } from './dilithium/index';
 
 // ═══════════════════════════════════════════
@@ -104,7 +104,7 @@ export function computeFlashId(fields: FlashTxFields): Uint8Array {
     u64LE(fields.expiryDaaScore),
     fields.salt,
   ];
-  return sha256(concat(...parts));
+  return sha3_256(concat(...parts));
 }
 
 /**
@@ -122,7 +122,7 @@ export function computeFlashSighash(fields: FlashTxFields): Uint8Array {
     u64LE(fields.expiryDaaScore),
     fields.salt,
   ];
-  return sha256(concat(...parts));
+  return sha3_256(concat(...parts));
 }
 
 // ═══════════════════════════════════════════
