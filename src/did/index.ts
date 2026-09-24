@@ -94,8 +94,9 @@ export function parseDid(did: string): { method: string; identifier: string } | 
 }
 
 export function generateDidIdentifier(publicKey: Uint8Array): string {
-  const hash = shake256Bytes(publicKey, 32);
-  return base58Encode(hash).slice(0, 32);
+  // Sahyadri DID = did:sahyadri:csm1s... (address-based, not hash)
+  const address = pubkeyToAddress(publicKey);
+  return address;
 }
 
 function base58Encode(bytes: Uint8Array): string {
